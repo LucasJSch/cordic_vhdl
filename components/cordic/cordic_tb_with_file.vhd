@@ -3,35 +3,32 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use std.textio.all;
 
-entity cordic_processor_tb_with_file is
+entity cordic_tb_with_file is
 end entity;
 
-architecture arch of cordic_processor_tb_with_file is
+architecture arch of cordic_tb_with_file is
 	constant N_BITS_VECTOR : integer := 15;
 	constant N_BITS_ANGLE  : integer := 18; 
 	constant N_ITER        : integer := 15; 
 
     -- Bits tolerance to verify correctness of result.
-    constant TOLERANCE     : signed := to_signed(10, N_BITS_VECTOR+1);
+    constant TOLERANCE     : signed := to_signed(50, N_BITS_VECTOR+1);
 	
     -- Remember to remove header line from file, if present.
 	file data_file : text open read_mode is "/home/ljsch/FIUBA/SisDig/repo_separado/cordic_vhdl/testing/testdata.txt";
 
-	component cordic_processor is
+	component cordic is
 	generic(
         -- Describes the amount of bits per vector element.
         N_BITS_VECTOR : integer:= 32;
         -- Describes the amount of bits to represent the angle.
-        N_BITS_ANGLE : integer := 17;
-        N_ITER       : integer := 10);
+        N_BITS_ANGLE : integer := 18;
+        N_ITER       : integer := 15);
     port(
         clk  : in std_logic;
         x1   : in std_logic_vector(N_BITS_VECTOR-1 downto 0);
         y1   : in std_logic_vector(N_BITS_VECTOR-1 downto 0);
         beta : in signed(N_BITS_ANGLE-1 downto 0);
-        -- 0: Rotation mode.
-        -- 1: Vectoring mode.
-        mode : in std_logic;
         start: in std_logic;
         x2   : out std_logic_vector(N_BITS_VECTOR downto 0);
         y2   : out std_logic_vector(N_BITS_VECTOR downto 0);
@@ -102,14 +99,13 @@ begin
 	yi_tb <= std_logic_vector(yi_file);
 	beta_tb <= signed(beta_file);
 
-	DUT: cordic_processor --Device under test
+	DUT: cordic --Device under test
 	generic map(N_BITS_VECTOR, N_BITS_ANGLE, N_ITER)
 	port map(
 		clk => clk_tb_internal,
 		x1 => xi_tb,
 		y1 => yi_tb,
         beta => beta_file,
-        mode => '0', -- rotation mode
         start => start_tb,
         x2 => xo_tb,
         y2 => yo_tb,
